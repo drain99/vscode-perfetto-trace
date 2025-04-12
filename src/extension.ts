@@ -12,12 +12,8 @@ export function activate(context: vscode.ExtensionContext): void {
 			"perfetto-trace.open-trace-active-editor",
 			() => {
 				openTraceForActiveEditor(context).then(
-					() => {
-						vscode.window.showInformationMessage("Successfully Opened Trace For Active Editor");
-					},
-					(reason: string) => {
-						vscode.window.showErrorMessage(reason);
-					}
+					() => vscode.window.showInformationMessage("Successfully Opened Trace For Active Editor"),
+					(reason: string) => vscode.window.showErrorMessage(reason)
 				);
 			}
 		)
@@ -28,12 +24,8 @@ export function activate(context: vscode.ExtensionContext): void {
 			"perfetto-trace.open-trace-file",
 			() => {
 				openTraceForFile(context).then(
-					() => {
-						vscode.window.showInformationMessage("Successfully Opened Trace For Active Editor");
-					},
-					(reason: string) => {
-						vscode.window.showErrorMessage(reason);
-					}
+					() => vscode.window.showInformationMessage("Successfully Opened Trace For Chosen File"),
+					(reason: string) => vscode.window.showErrorMessage(reason)
 				);
 			}
 		)

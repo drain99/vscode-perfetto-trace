@@ -4,23 +4,20 @@
 import * as vscode from 'vscode';
 
 export function setupWebview(context: vscode.ExtensionContext, fileName: string, fileBuffer: ArrayBuffer): void {
-  const panelTitle = `${fileName} - Perfetto UI`;
-  console.log(`${panelTitle} has fileBuffer: ${fileBuffer}`);
-
   const panel = vscode.window.createWebviewPanel(
     "PerfettoUI",
-    panelTitle,
+    `${fileName} - Perfetto`,
     { viewColumn: vscode.ViewColumn.Active, preserveFocus: false },
     { enableScripts: true, retainContextWhenHidden: true }
   );
 
   panel.onDidDispose(() => {
-    console.log(`${panelTitle} webview disposed`);
+    console.log(`${fileName} webview disposed`);
   }, null, context.subscriptions);
 
   panel.webview.onDidReceiveMessage(message => {
     if (message.command === 'ui-ready') {
-      console.log(`${panelTitle} is ready, sending trace data`);
+      console.log(`${fileName} is ready, sending trace data`);
       panel.webview.postMessage({
         command: 'trace-data',
         payload: {

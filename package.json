@@ -2,7 +2,7 @@
   "name": "perfetto-trace",
   "displayName": "Perfetto Trace",
   "description": "Open trace files in perfetto UI directly even in remote workspaces.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "license": "MIT",
   "engines": {
     "vscode": "^1.99.0"
