@@ -1,3 +1,6 @@
+// Copyright (c) Indrajit Banerjee
+// Licensed under the MIT License.
+
 import * as vscode from 'vscode';
 
 export function setupWebview(context: vscode.ExtensionContext, fileName: string, fileBuffer: ArrayBuffer): void {

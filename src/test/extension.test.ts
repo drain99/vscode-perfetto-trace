@@ -1,3 +1,6 @@
+// Copyright (c) Indrajit Banerjee
+// Licensed under the MIT License.
+
 import * as assert from 'assert';
 
 // You can import and use all API from the 'vscode' module

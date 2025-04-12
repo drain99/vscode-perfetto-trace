@@ -1,3 +1,6 @@
+// Copyright (c) Indrajit Banerjee
+// Licensed under the MIT License.
+
 import * as vscode from 'vscode';
 import { openTraceForActiveEditor, openTraceForFile } from './trace';
 
