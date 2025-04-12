@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-04-12
+
+### Added
+- Implement first iteration of "Perfetto: Open Trace" command.
 
 ## [0.0.1] - 2025-04-12
 

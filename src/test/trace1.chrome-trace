@@ -1,0 +1,46 @@
+{
+  "traceEvents": [
+    {
+      "name": "main",
+      "ph": "B",
+      "ts": 1000,
+      "pid": 1,
+      "tid": 1
+    },
+    {
+      "name": "functionA",
+      "ph": "B",
+      "ts": 1100,
+      "pid": 1,
+      "tid": 1
+    },
+    {
+      "name": "functionB",
+      "ph": "B",
+      "ts": 1200,
+      "pid": 1,
+      "tid": 1
+    },
+    {
+      "name": "functionB",
+      "ph": "E",
+      "ts": 1300,
+      "pid": 1,
+      "tid": 1
+    },
+    {
+      "name": "functionA",
+      "ph": "E",
+      "ts": 1400,
+      "pid": 1,
+      "tid": 1
+    },
+    {
+      "name": "main",
+      "ph": "E",
+      "ts": 1500,
+      "pid": 1,
+      "tid": 1
+    }
+  ]
+}
