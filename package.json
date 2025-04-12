@@ -2,7 +2,7 @@
   "name": "perfetto-trace",
   "displayName": "Perfetto Trace",
   "description": "Open trace files in perfetto UI directly even in remote workspaces.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "engines": {
     "vscode": "^1.99.0"
   },
@@ -14,8 +14,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "perfetto-trace.open-trace",
-        "title": "Perfetto: Open Trace"
+        "command": "perfetto-trace.open-trace-active-editor",
+        "title": "Perfetto: Open Trace For Active Editor"
+      },
+      {
+        "command": "perfetto-trace.open-trace-file",
+        "title": "Perfetto: Open Trace For File"
       }
     ]
   },
