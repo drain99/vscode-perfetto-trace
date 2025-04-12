@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Robust error handling of all promises.
+- Show a progress bar to user until the ui has fully loaded the trace file.
+- Support for remote development environments.
+- Option to open perfetto ui in browser as an alternate to embedded within vscode.
 
 ## [0.1.1] - 2025-04-12
 
