@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for remote development environments.
 - Option to open perfetto ui in browser as an alternate to embedded within vscode.
 
+## [0.2.0] - 2025-04-13
+
+### Added
+- Show trace launch progress in notification for both "Open Trace" commands.
+- Improve security with explicit content security policy.
+
 ## [0.1.1] - 2025-04-12
 
 ### Added

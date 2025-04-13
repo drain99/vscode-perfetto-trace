@@ -2,43 +2,19 @@
 // Licensed under the MIT License.
 
 import * as vscode from 'vscode';
+import { WebviewConsts } from './constants';
 
-export function setupWebview(context: vscode.ExtensionContext, fileName: string, fileBuffer: ArrayBuffer): void {
-  const panel = vscode.window.createWebviewPanel(
-    "PerfettoUI",
-    `${fileName} - Perfetto`,
-    { viewColumn: vscode.ViewColumn.Active, preserveFocus: false },
-    { enableScripts: true, retainContextWhenHidden: true }
-  );
-
-  panel.onDidDispose(() => {
-    console.log(`${fileName} webview disposed`);
-  }, null, context.subscriptions);
-
-  panel.webview.onDidReceiveMessage(message => {
-    if (message.command === 'ui-ready') {
-      console.log(`${fileName} is ready, sending trace data`);
-      panel.webview.postMessage({
-        command: 'trace-data',
-        payload: {
-          buffer: fileBuffer,
-          title: fileName,
-          fileName: fileName,
-          uri: null,
-        }
-      });
-    }
-  }, null, context.subscriptions);
-
-  panel.webview.html = getWebviewHTML();
-}
-
-function getWebviewHTML(): string {
-  return `<!DOCTYPE html>
+export function getWebviewHTML(cspSourceSelf: string): string {
+	return `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy"
+		content="default-src 'none';
+			script-src ${cspSourceSelf} ${WebviewConsts.PerfettoOrigin} 'unsafe-inline';
+			style-src ${cspSourceSelf} ${WebviewConsts.PerfettoOrigin} 'unsafe-inline';
+			frame-src ${WebviewConsts.PerfettoOrigin}">
 	<title>Perfetto UI</title>
 	<style>
 		body {
@@ -60,34 +36,43 @@ function getWebviewHTML(): string {
 		(function() {
 			document.addEventListener("DOMContentLoaded", function() {
 				const code = acquireVsCodeApi();
-				const ui = document.getElementById("perfetto-ui-iframe");
+				const ui = document.getElementById("${WebviewConsts.PerfettoFrameId}");
+
+				let pingInterval = null;
+				let uiReady = false;
+				let traceLoaded = false;
 
 				const sendPing = () => {
-					console.log("Sending PING to Perfetto UI");
-					ui.contentWindow.postMessage("PING", "*");
+					console.log("Sending PING");
+					ui.contentWindow.postMessage("PING", "${WebviewConsts.PerfettoOrigin}");
 				};
 
-				let pingInterval = undefined;
-
-				window.addEventListener("message", event => {
-					if (event.data === "PONG" && event.source === ui.contentWindow) {
-						console.log("Received PONG from Perfetto UI");
-						code.postMessage({command: 'ui-ready'});
-						clearInterval(pingInterval);
+				const messageHandler = event => {
+					console.log("Received message:", event);
+					if (event.data === "PONG" && event.origin === "${WebviewConsts.PerfettoOrigin}") {
+					  if (!uiReady) {
+							uiReady = true;
+							code.postMessage({ command: "${WebviewConsts.VsCodeUiReadyCommand}" });
+						}
+						if (pingInterval) {
+							clearInterval(pingInterval);
+							pingInterval = null;
+						}
+					} else if (event.data.command === "${WebviewConsts.VsCodeLoadTraceCommand}") {
+					  if (!traceLoaded) {
+							traceLoaded = true;
+							ui.contentWindow.postMessage({ perfetto: event.data.payload }, "${WebviewConsts.PerfettoOrigin}");
+							code.postMessage({ command: "${WebviewConsts.VsCodeTraceLoadedCommand}" });
+						}
 					}
-				});
+				};
 
-				pingInterval = setInterval(() => { sendPing(); }, 500);
-
-				window.addEventListener("message", event => {
-					if (event.data.command === "trace-data") {
-						ui.contentWindow.postMessage({perfetto: event.data.payload}, "*");
-					}
-				});
+				window.addEventListener('message', messageHandler);
+				pingInterval = setInterval(() => sendPing(), 500);
 			});
 		}())
 	</script>
-	<iframe id="perfetto-ui-iframe" src="https://ui.perfetto.dev" allow="fullscreen"></iframe>
+	<iframe id="${WebviewConsts.PerfettoFrameId}" src="${WebviewConsts.PerfettoOrigin}"></iframe>
 </body>
 </html>`;
 }

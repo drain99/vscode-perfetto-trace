@@ -3,42 +3,146 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { setupWebview } from './webview';
+import { getWebviewHTML } from './webview';
+import { TraceOpenResult, WebviewConsts } from './constants';
 
-function isValidTraceFile(filePath: string): boolean {
+function hasValidTraceExtension(filePath: string): boolean {
   const validExtensions = [".json", ".trace", ".chrome-trace", ".perfetto-trace"];
   const ext = path.extname(filePath);
   return validExtensions.includes(ext);
 }
 
-export async function openTraceForActiveEditor(context: vscode.ExtensionContext): Promise<void> {
+export function openTraceForActiveEditor(_context: vscode.ExtensionContext): Thenable<TraceOpenResult> {
   const activeDoc = vscode.window.activeTextEditor?.document;
   if (!activeDoc) {
-    return Promise.reject("No active editor found!");
+    return Promise.resolve(TraceOpenResult.NoActiveEditor);
   }
 
   const filePath = activeDoc.fileName;
-  if (!isValidTraceFile(filePath)) {
-    return Promise.reject("Active file has invalid extension!");
+  if (!hasValidTraceExtension(filePath)) {
+    return Promise.resolve(TraceOpenResult.FileInvalidExtention);
   }
 
-  const fileName = path.basename(filePath);
-  const fileBuffer = new TextEncoder().encode(activeDoc.getText()).buffer;
-  setupWebview(context, fileName, fileBuffer);
+  return vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification,
+    cancellable: true,
+    title: "Opening Trace..."
+  }, (_progress, token) => {
+    return new Promise<TraceOpenResult>(resolve => {
+      let panel: vscode.WebviewPanel | undefined;
+      token.onCancellationRequested(() => {
+        if (panel) {
+          panel.dispose();
+        }
+        return resolve(TraceOpenResult.UserCanceledProgress);
+      });
+
+      const fileName = path.basename(filePath);
+      const fileBuffer = new TextEncoder().encode(activeDoc.getText()).buffer;
+
+      panel = vscode.window.createWebviewPanel(
+        "perfettoUi", `${fileName} - Perfetto`,
+        { viewColumn: vscode.ViewColumn.Active, preserveFocus: false },
+        { enableScripts: true, retainContextWhenHidden: true }
+      );
+
+      let panelCallbacks: vscode.Disposable[] = [];
+      panel.onDidDispose(() => {
+        console.log('perfetto webview is disposed, disposing callbacks');
+        panelCallbacks.forEach(disposable => disposable.dispose());
+        return resolve(TraceOpenResult.UserClosedWindow);
+      }, null, panelCallbacks);
+
+      panel.webview.onDidReceiveMessage(message => {
+        switch (message.command) {
+          case WebviewConsts.VsCodeUiReadyCommand:
+            panel.webview.postMessage({
+              command: WebviewConsts.VsCodeLoadTraceCommand,
+              payload: {
+                buffer: fileBuffer,
+                title: fileName,
+                fileName: fileName,
+              }
+            });
+            return;
+          case WebviewConsts.VsCodeTraceLoadedCommand:
+            return resolve(TraceOpenResult.Success);
+          default:
+            console.log("webview received unexpected message:", message);
+        }
+      }, null, panelCallbacks);
+
+      panel.webview.html = getWebviewHTML(panel.webview.cspSource);
+    });
+  });
 }
 
-export async function openTraceForFile(context: vscode.ExtensionContext): Promise<void> {
-  const selection = await vscode.window.showOpenDialog({ canSelectFiles: true, canSelectMany: false });
-  if (!selection || selection.length !== 1) {
-    return Promise.reject("No file is selected!");
-  }
+export function openTraceForFile(_context: vscode.ExtensionContext): Thenable<TraceOpenResult> {
+  return vscode.window.showOpenDialog({ canSelectFiles: true, canSelectMany: false }).then(selection => {
+    if (!selection) {
+      return Promise.resolve(TraceOpenResult.NoFileSelected);
+    }
 
-  const fileUri = selection[0];
-  if (!isValidTraceFile(fileUri.fsPath)) {
-    return Promise.reject("Chosen file has invalid extension!");
-  }
+    if (selection.length !== 1) {
+      return Promise.resolve(TraceOpenResult.MultipleFileSelected);
+    }
 
-  const fileName = path.basename(fileUri.fsPath);
-  const fileBuffer = (await vscode.workspace.fs.readFile(fileUri)).buffer;
-  setupWebview(context, fileName, fileBuffer);
+    const fileUri = selection[0];
+    if (!hasValidTraceExtension(fileUri.fsPath)) {
+      return Promise.resolve(TraceOpenResult.FileInvalidExtention);
+    }
+
+    return vscode.window.withProgress({
+      location: vscode.ProgressLocation.Notification,
+      cancellable: true,
+      title: "Opening Trace..."
+    }, (_progress, token) => {
+      return new Promise<TraceOpenResult>(resolve => {
+        let panel: vscode.WebviewPanel | undefined;
+        token.onCancellationRequested(() => {
+          if (panel) {
+            panel.dispose();
+          }
+          return resolve(TraceOpenResult.UserCanceledProgress);
+        });
+
+        const fileName = path.basename(fileUri.fsPath);
+        vscode.workspace.fs.readFile(fileUri).then(fileBuffer => {
+          panel = vscode.window.createWebviewPanel(
+            "perfettoUi", `${fileName} - Perfetto`,
+            { viewColumn: vscode.ViewColumn.Active, preserveFocus: false },
+            { enableScripts: true, retainContextWhenHidden: true }
+          );
+
+          let panelCallbacks: vscode.Disposable[] = [];
+          panel.onDidDispose(() => {
+            console.log('perfetto webview is disposed, disposing callbacks');
+            panelCallbacks.forEach(disposable => disposable.dispose());
+            return resolve(TraceOpenResult.UserClosedWindow);
+          }, null, panelCallbacks);
+
+          panel.webview.onDidReceiveMessage(message => {
+            switch (message.command) {
+              case WebviewConsts.VsCodeUiReadyCommand:
+                panel!.webview.postMessage({
+                  command: WebviewConsts.VsCodeLoadTraceCommand,
+                  payload: {
+                    buffer: fileBuffer.buffer,
+                    title: fileName,
+                    fileName: fileName,
+                  }
+                });
+                return;
+              case WebviewConsts.VsCodeTraceLoadedCommand:
+                return resolve(TraceOpenResult.Success);
+              default:
+                console.log("webview received unexpected message:", message);
+            }
+          }, null, panelCallbacks);
+
+          panel.webview.html = getWebviewHTML(panel.webview.cspSource);
+        });
+      });
+    });
+  });
 }
