@@ -7,6 +7,7 @@ import { getWebviewHTML } from './webview';
 import { TraceOpenResult, WebviewConsts } from './constants';
 
 function hasValidTraceExtension(filePath: string): boolean {
+  return true; // skip extention check for now
   const validExtensions = [".json", ".trace", ".chrome-trace", ".perfetto-trace"];
   const ext = path.extname(filePath);
   return validExtensions.includes(ext);
