@@ -43,26 +43,25 @@ export function getWebviewHTML(cspSourceSelf: string): string {
 				let traceLoaded = false;
 
 				const sendPing = () => {
-					console.log("Sending PING");
 					ui.contentWindow.postMessage("PING", "${WebviewConsts.PerfettoOrigin}");
 				};
 
 				const messageHandler = event => {
-					console.log("Received message:", event);
 					if (event.data === "PONG" && event.origin === "${WebviewConsts.PerfettoOrigin}") {
 					  if (!uiReady) {
 							uiReady = true;
 							code.postMessage({ command: "${WebviewConsts.VsCodeUiReadyCommand}" });
-						}
-						if (pingInterval) {
+							console.log("PONG: ui became ready");
+						} else if (traceLoaded) {
+							console.log("PONG: trace is loaded"); 
 							clearInterval(pingInterval);
 							pingInterval = null;
+							code.postMessage({ command: "${WebviewConsts.VsCodeTraceLoadedCommand}" });
 						}
 					} else if (event.data.command === "${WebviewConsts.VsCodeLoadTraceCommand}") {
 					  if (!traceLoaded) {
 							traceLoaded = true;
 							ui.contentWindow.postMessage({ perfetto: event.data.payload }, "${WebviewConsts.PerfettoOrigin}");
-							code.postMessage({ command: "${WebviewConsts.VsCodeTraceLoadedCommand}" });
 						}
 					}
 				};

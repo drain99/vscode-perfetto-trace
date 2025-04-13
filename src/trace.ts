@@ -62,6 +62,7 @@ export function openTraceForActiveEditor(_context: vscode.ExtensionContext): The
                 buffer: fileBuffer,
                 title: fileName,
                 fileName: fileName,
+                keepApiOpen: true,
               }
             });
             return;
@@ -130,6 +131,7 @@ export function openTraceForFile(_context: vscode.ExtensionContext): Thenable<Tr
                     buffer: fileBuffer.buffer,
                     title: fileName,
                     fileName: fileName,
+                    keepApiOpen: true,
                   }
                 });
                 return;
