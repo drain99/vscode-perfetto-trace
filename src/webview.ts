@@ -35,7 +35,7 @@ export function getWebviewHTML(cspSourceSelf: string): string {
 	<script type="text/javascript">
 		(function() {
 			document.addEventListener("DOMContentLoaded", function() {
-				const code = acquireVsCodeApi();
+				const vscode = acquireVsCodeApi();
 				const ui = document.getElementById("${WebviewConsts.PerfettoFrameId}");
 
 				let pingInterval = null;
@@ -50,13 +50,13 @@ export function getWebviewHTML(cspSourceSelf: string): string {
 					if (event.data === "PONG" && event.origin === "${WebviewConsts.PerfettoOrigin}") {
 					  if (!uiReady) {
 							uiReady = true;
-							code.postMessage({ command: "${WebviewConsts.VsCodeUiReadyCommand}" });
+							vscode.postMessage({ command: "${WebviewConsts.VsCodeUiReadyCommand}" });
 							console.log("PONG: ui became ready");
 						} else if (traceLoaded) {
 							console.log("PONG: trace is loaded"); 
 							clearInterval(pingInterval);
 							pingInterval = null;
-							code.postMessage({ command: "${WebviewConsts.VsCodeTraceLoadedCommand}" });
+							vscode.postMessage({ command: "${WebviewConsts.VsCodeTraceLoadedCommand}" });
 						}
 					} else if (event.data.command === "${WebviewConsts.VsCodeLoadTraceCommand}") {
 					  if (!traceLoaded) {
