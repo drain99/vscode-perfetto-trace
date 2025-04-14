@@ -2,34 +2,26 @@
 // Licensed under the MIT License.
 
 import * as vscode from 'vscode';
-import { openTraceForActiveEditor, openTraceForFile } from './trace';
-import { Commands, TraceOpenResult } from './constants';
+import { openTraceForActiveEditor, openTraceForFile, TraceOpenResultHandler } from './trace';
+import { Commands } from './constants';
 
 export function activate(context: vscode.ExtensionContext): void {
-	// Show error message on trace open failure but allow user to disable these messages
-	let showOpenTraceFailMessage = true;
-	const openTraceResultHandler = (result: TraceOpenResult) => {
-		if (result !== TraceOpenResult.Success && showOpenTraceFailMessage) {
-			vscode.window.showErrorMessage(`Failed to open trace: ${result}`, 'Do Not Show Again').then(selection => {
-				if (selection === 'Do Not Show Again') {
-					showOpenTraceFailMessage = false;
-				}
-			});
-		}
-	};
+	const traceOpenResultHandler = new TraceOpenResultHandler();
 
 	// Register all commands
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			Commands.OpenTraceActiveEditor,
-			() => openTraceForActiveEditor(context).then(event => openTraceResultHandler(event))
+			() => openTraceForActiveEditor(context)
+				.then(event => traceOpenResultHandler.handle(event))
 		)
 	);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			Commands.OpenTraceFile,
-			() => openTraceForFile(context).then(event => openTraceResultHandler(event))
+			() => openTraceForFile(context)
+				.then(event => traceOpenResultHandler.handle(event))
 		)
 	);
 }

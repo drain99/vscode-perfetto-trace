@@ -6,6 +6,26 @@ import * as path from 'path';
 import { getWebviewHTML } from './webview';
 import { TraceOpenResult, WebviewConsts } from './constants';
 
+export class TraceOpenResultHandler {
+  private showOpenTraceFailMessage: boolean;
+
+  public constructor() {
+    this.showOpenTraceFailMessage = true;
+  }
+
+  public handle(result: TraceOpenResult): void {
+    // Show error message on trace open failure but allow user to disable these messages
+    if (result !== TraceOpenResult.Success && this.showOpenTraceFailMessage) {
+      vscode.window.showErrorMessage(`Failed to open trace: ${result}`, 'Do Not Show Again')
+        .then(selection => {
+          if (selection === 'Do Not Show Again') {
+            this.showOpenTraceFailMessage = false;
+          }
+        });
+    }
+  }
+}
+
 function hasValidTraceExtension(filePath: string): boolean {
   // Skip extention check for now, perfetto accepts a variety of formats with non-standard extensions
   return true;
