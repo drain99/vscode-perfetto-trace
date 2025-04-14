@@ -3,8 +3,8 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { getWebviewHTML } from './webview';
-import { TraceOpenResult, WebviewConsts } from './constants';
+import { PerfettoSession } from './webview';
+import { TraceOpenResult } from './constants';
 
 export class TraceOpenResultHandler {
   private showOpenTraceFailMessage: boolean;
@@ -35,141 +35,76 @@ function hasValidTraceExtension(filePath: string): boolean {
 }
 
 export function openTraceForActiveEditor(_context: vscode.ExtensionContext): Thenable<TraceOpenResult> {
-  // Initial sanity checks before showing progress to user to avoid sudden progress bar start & end
-  const activeDoc = vscode.window.activeTextEditor?.document;
-  if (!activeDoc) {
-    return Promise.resolve(TraceOpenResult.NoActiveEditor);
-  }
-
-  const filePath = activeDoc.fileName;
-  if (!hasValidTraceExtension(filePath)) {
-    return Promise.resolve(TraceOpenResult.FileInvalidExtention);
-  }
-
-  return vscode.window.withProgress({
-    location: vscode.ProgressLocation.Notification,
-    cancellable: true,
-    title: "Opening Trace"
-  }, (_progress, token) => {
-    return new Promise<TraceOpenResult>(resolve => {
-      let panel: vscode.WebviewPanel | undefined;
-      token.onCancellationRequested(() => {
-        if (panel) {
-          panel.dispose();
-        }
-        return resolve(TraceOpenResult.UserCanceledProgress);
-      });
-
-      const fileName = path.basename(filePath);
-      const fileBuffer = new TextEncoder().encode(activeDoc.getText()).buffer;
-
-      panel = vscode.window.createWebviewPanel(
-        "perfettoUi", `${fileName} - Perfetto`,
-        { viewColumn: vscode.ViewColumn.Active, preserveFocus: false },
-        { enableScripts: true, retainContextWhenHidden: true }
-      );
-
-      let panelCallbacks: vscode.Disposable[] = [];
-      panel.onDidDispose(() => {
-        console.log('perfetto webview is disposed, disposing callbacks');
-        panelCallbacks.forEach(disposable => disposable.dispose());
-        return resolve(TraceOpenResult.UserClosedWindow);
-      }, null, panelCallbacks);
-
-      // See [Note: State machine to synchronize between extension, webview & perfetto ui iframe]
-      panel.webview.onDidReceiveMessage(message => {
-        switch (message.command) {
-          case WebviewConsts.VsCodeUiReadyCommand:
-            panel.webview.postMessage({
-              command: WebviewConsts.VsCodeLoadTraceCommand,
-              payload: {
-                buffer: fileBuffer,
-                title: fileName,
-                fileName: fileName,
-                keepApiOpen: true,
-              }
-            });
-            return;
-          case WebviewConsts.VsCodeTraceLoadedCommand:
-            return resolve(TraceOpenResult.Success);
-          default:
-            console.log("webview received unexpected message:", message);
-        }
-      }, null, panelCallbacks);
-
-      panel.webview.html = getWebviewHTML(panel.webview.cspSource);
-    });
-  });
-}
-
-export function openTraceForFile(_context: vscode.ExtensionContext): Thenable<TraceOpenResult> {
-  return vscode.window.showOpenDialog({ canSelectFiles: true, canSelectMany: false }).then(selection => {
-    // Initial sanity checks before showing progress to user to avoid sudden progress bar start & end
-    if (!selection) {
-      return Promise.resolve(TraceOpenResult.NoFileSelected);
+  return new Promise<TraceOpenResult>(resolve => {
+    const activeDoc = vscode.window.activeTextEditor?.document;
+    if (!activeDoc) {
+      return resolve(TraceOpenResult.NoActiveEditor);
     }
 
-    if (selection.length !== 1) {
-      return Promise.resolve(TraceOpenResult.MultipleFileSelected);
+    const filePath = activeDoc.fileName;
+    if (!hasValidTraceExtension(filePath)) {
+      return resolve(TraceOpenResult.FileInvalidExtention);
     }
 
-    const fileUri = selection[0];
-    if (!hasValidTraceExtension(fileUri.fsPath)) {
-      return Promise.resolve(TraceOpenResult.FileInvalidExtention);
-    }
-
-    return vscode.window.withProgress({
+    return resolve(vscode.window.withProgress({
       location: vscode.ProgressLocation.Notification,
       cancellable: true,
       title: "Opening Trace"
     }, (_progress, token) => {
       return new Promise<TraceOpenResult>(resolve => {
-        let panel: vscode.WebviewPanel | undefined;
-        token.onCancellationRequested(() => {
-          if (panel) {
-            panel.dispose();
-          }
-          return resolve(TraceOpenResult.UserCanceledProgress);
+        const perfettoSession = new PerfettoSession();
+        const tokenListener = token.onCancellationRequested(() => {
+          perfettoSession.deactivate();
         });
 
-        const fileName = path.basename(fileUri.fsPath);
-        vscode.workspace.fs.readFile(fileUri).then(fileBuffer => {
-          panel = vscode.window.createWebviewPanel(
-            "perfettoUi", `${fileName} - Perfetto`,
-            { viewColumn: vscode.ViewColumn.Active, preserveFocus: false },
-            { enableScripts: true, retainContextWhenHidden: true }
-          );
+        const fileName = path.basename(filePath);
+        const fileBuffer = new TextEncoder().encode(activeDoc.getText()).buffer;
 
-          let panelCallbacks: vscode.Disposable[] = [];
-          panel.onDidDispose(() => {
-            console.log('perfetto webview is disposed, disposing callbacks');
-            panelCallbacks.forEach(disposable => disposable.dispose());
-            return resolve(TraceOpenResult.UserClosedWindow);
-          }, null, panelCallbacks);
-
-          panel.webview.onDidReceiveMessage(message => {
-            switch (message.command) {
-              case WebviewConsts.VsCodeUiReadyCommand:
-                panel!.webview.postMessage({
-                  command: WebviewConsts.VsCodeLoadTraceCommand,
-                  payload: {
-                    buffer: fileBuffer.buffer,
-                    title: fileName,
-                    fileName: fileName,
-                    keepApiOpen: true,
-                  }
-                });
-                return;
-              case WebviewConsts.VsCodeTraceLoadedCommand:
-                return resolve(TraceOpenResult.Success);
-              default:
-                console.log("webview received unexpected message:", message);
-            }
-          }, null, panelCallbacks);
-
-          panel.webview.html = getWebviewHTML(panel.webview.cspSource);
-        });
+        perfettoSession.activate(fileName, fileBuffer, () => {
+          tokenListener.dispose();
+          return resolve(TraceOpenResult.UserCanceledAction);
+        }, () => resolve(TraceOpenResult.Success));
       });
+    }));
+  });
+}
+
+export function openTraceForFile(_context: vscode.ExtensionContext): Thenable<TraceOpenResult> {
+  return vscode.window.showOpenDialog({ canSelectFiles: true, canSelectMany: false }).then(selection => {
+    return new Promise<TraceOpenResult>(resolve => {
+      if (!selection) {
+        return resolve(TraceOpenResult.NoFileSelected);
+      }
+
+      if (selection.length !== 1) {
+        return resolve(TraceOpenResult.MultipleFileSelected);
+      }
+
+      const fileUri = selection[0];
+      if (!hasValidTraceExtension(fileUri.fsPath)) {
+        return resolve(TraceOpenResult.FileInvalidExtention);
+      }
+
+      return resolve(vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        cancellable: true,
+        title: "Opening Trace"
+      }, (_progress, token) => {
+        return new Promise<TraceOpenResult>(resolve => {
+          const perfettoSession = new PerfettoSession();
+          const tokenListener = token.onCancellationRequested(() => {
+            perfettoSession.deactivate();
+          });
+
+          const fileName = path.basename(fileUri.fsPath);
+          vscode.workspace.fs.readFile(fileUri).then(fileBuffer => {
+            perfettoSession.activate(fileName, fileBuffer.buffer, () => {
+              tokenListener.dispose();
+              return resolve(TraceOpenResult.UserCanceledAction);
+            }, () => resolve(TraceOpenResult.Success));
+          });
+        });
+      }));
     });
   });
 }

@@ -20,6 +20,5 @@ export enum TraceOpenResult {
   FileInvalidExtention = "File Has Invalid Extension!",
   NoFileSelected = "No File Is Selected To Be Opened!",
   MultipleFileSelected = "Multiple Files Are Selected To Be Opened!",
-  UserCanceledProgress = "Action Canceled By User!",
-  UserClosedWindow = "Window Closed Before Load Has Finished!",
+  UserCanceledAction = "User canceled action!",
 };
