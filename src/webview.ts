@@ -1,7 +1,6 @@
 // Copyright (c) Indrajit Banerjee
 // Licensed under the MIT License.
 
-import * as vscode from 'vscode';
 import { WebviewConsts } from './constants';
 
 export function getWebviewHTML(cspSourceSelf: string): string {
@@ -42,10 +41,19 @@ export function getWebviewHTML(cspSourceSelf: string): string {
 				let uiReady = false;
 				let traceLoaded = false;
 
+				// Use ping-pong handshaking to check perfetto iframe is fully loaded and ready
+				// to receive load trace message.
+				// Ref: https://perfetto.dev/docs/visualization/deep-linking-to-perfetto-ui#using-window-open-and-postmessage
 				const sendPing = () => {
 					ui.contentWindow.postMessage("PING", "${WebviewConsts.PerfettoOrigin}");
 				};
 
+				// [Note: State machine to synchronize between extension, webview & perfetto ui iframe]
+				// Keep sending pings to perfetto ui iframe till completion.
+				// Receive first pong from perfetto ui => UiReady state
+				// Update extension that ui is ready & receive the load trace payload => WaitingForTrace state
+				// Receive trace payload from extension and forward to perfetto ui => TraceLoading state
+				// Receive another pong from perfetto ui => TraceLoaded state [this is heuristic, actual load takes longer]
 				const messageHandler = event => {
 					if (event.data === "PONG" && event.origin === "${WebviewConsts.PerfettoOrigin}") {
 					  if (!uiReady) {

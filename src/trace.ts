@@ -7,13 +7,15 @@ import { getWebviewHTML } from './webview';
 import { TraceOpenResult, WebviewConsts } from './constants';
 
 function hasValidTraceExtension(filePath: string): boolean {
-  return true; // skip extention check for now
+  // Skip extention check for now, perfetto accepts a variety of formats with non-standard extensions
+  return true;
   const validExtensions = [".json", ".trace", ".chrome-trace", ".perfetto-trace"];
   const ext = path.extname(filePath);
   return validExtensions.includes(ext);
 }
 
 export function openTraceForActiveEditor(_context: vscode.ExtensionContext): Thenable<TraceOpenResult> {
+  // Initial sanity checks before showing progress to user to avoid sudden progress bar start & end
   const activeDoc = vscode.window.activeTextEditor?.document;
   if (!activeDoc) {
     return Promise.resolve(TraceOpenResult.NoActiveEditor);
@@ -27,7 +29,7 @@ export function openTraceForActiveEditor(_context: vscode.ExtensionContext): The
   return vscode.window.withProgress({
     location: vscode.ProgressLocation.Notification,
     cancellable: true,
-    title: "Opening Trace..."
+    title: "Opening Trace"
   }, (_progress, token) => {
     return new Promise<TraceOpenResult>(resolve => {
       let panel: vscode.WebviewPanel | undefined;
@@ -54,6 +56,7 @@ export function openTraceForActiveEditor(_context: vscode.ExtensionContext): The
         return resolve(TraceOpenResult.UserClosedWindow);
       }, null, panelCallbacks);
 
+      // See [Note: State machine to synchronize between extension, webview & perfetto ui iframe]
       panel.webview.onDidReceiveMessage(message => {
         switch (message.command) {
           case WebviewConsts.VsCodeUiReadyCommand:
@@ -81,6 +84,7 @@ export function openTraceForActiveEditor(_context: vscode.ExtensionContext): The
 
 export function openTraceForFile(_context: vscode.ExtensionContext): Thenable<TraceOpenResult> {
   return vscode.window.showOpenDialog({ canSelectFiles: true, canSelectMany: false }).then(selection => {
+    // Initial sanity checks before showing progress to user to avoid sudden progress bar start & end
     if (!selection) {
       return Promise.resolve(TraceOpenResult.NoFileSelected);
     }
@@ -97,7 +101,7 @@ export function openTraceForFile(_context: vscode.ExtensionContext): Thenable<Tr
     return vscode.window.withProgress({
       location: vscode.ProgressLocation.Notification,
       cancellable: true,
-      title: "Opening Trace..."
+      title: "Opening Trace"
     }, (_progress, token) => {
       return new Promise<TraceOpenResult>(resolve => {
         let panel: vscode.WebviewPanel | undefined;
