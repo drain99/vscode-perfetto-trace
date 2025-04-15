@@ -4,6 +4,11 @@
   "description": "Open trace files in perfetto UI directly even in remote workspaces.",
   "version": "0.2.8",
   "license": "MIT",
+  "homepage": "https://github.com/drain99/vscode-perfetto-trace",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/drain99/vscode-perfetto-trace"
+  },
   "publisher": "drain99",
   "engines": {
     "vscode": "^1.99.0"
