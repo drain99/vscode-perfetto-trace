@@ -8,18 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Features
-- Support for remote development environments.
+- Verify extension support in web instances (e.g., https://vscode.dev/).
 - Option to open perfetto ui in browser as an alternate to embedded within vscode.
 
 ### Project infrastructure
 - Write extension tests to verify most ways to launch and close traces.
-- Configure bundling with esbuild.
 - Automate tests with ci.
+
+## [0.2.10] - 2025-04-16
+
+### Added
+- Verified support for following remote development environments:
+  - container, ssh, wsl, codespaces web & native
+- Add single-file bundling to support web instances of VSCode.
 
 ## [0.2.9] - 2025-04-15
 
+### Added
 - First pre-release publish.
-
 
 ## [0.2.0] - 2025-04-13
 

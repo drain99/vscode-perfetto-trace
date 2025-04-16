@@ -1,11 +1,29 @@
+# vscode ide config
 .vscode/**
+
+# vscode-test cache
 .vscode-test/**
-src/**
-.gitignore
-.yarnrc
-vsc-extension-quickstart.md
-**/tsconfig.json
-**/eslint.config.mjs
+
+# build temporaries
+out/**
 **/*.map
 **/*.ts
-**/.vscode-test.*
+**/*.vsix
+
+# sources
+src/**
+
+# tool config scripts
+tsconfig.json
+eslint.config.mjs
+esbuild.js
+.vscode-test.mjs
+
+# npm
+node_modules/**
+
+# git
+.gitignore
+
+# misc
+.yarnrc
