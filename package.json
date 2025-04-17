@@ -1,7 +1,7 @@
 {
   "name": "perfetto-trace",
   "displayName": "Perfetto Trace",
-  "description": "Open trace files in perfetto UI directly even in remote workspaces.",
+  "description": "Open perfetto-compatible trace files in perfetto ui within VS Code even for remote workspaces.",
   "version": "0.2.10",
   "license": "MIT",
   "homepage": "https://github.com/drain99/vscode-perfetto-trace",
@@ -16,6 +16,10 @@
   "categories": [
     "Visualization",
     "Other"
+  ],
+  "keywords": [
+    "Perfetto Trace",
+    "Chrome Trace"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
