@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as vscode from 'vscode';
-import * as path from 'path';
+import { Utils } from 'vscode-uri';
 import { PerfettoSession } from './webview';
 import { TraceOpenResult } from './constants';
 
@@ -26,11 +26,11 @@ export class TraceOpenResultHandler {
   }
 }
 
-function hasValidTraceExtension(filePath: string): boolean {
+function hasValidTraceExtension(fileUri: vscode.Uri): boolean {
   // Skip extention check for now, perfetto accepts a variety of formats with non-standard extensions
   return true;
   const validExtensions = [".json", ".trace", ".chrome-trace", ".perfetto-trace"];
-  const ext = path.extname(filePath);
+  const ext = Utils.extname(fileUri);
   return validExtensions.includes(ext);
 }
 
@@ -41,8 +41,8 @@ export function openTraceForActiveEditor(_context: vscode.ExtensionContext): The
       return resolve(TraceOpenResult.NoActiveEditor);
     }
 
-    const filePath = activeDoc.fileName;
-    if (!hasValidTraceExtension(filePath)) {
+    const fileUri = activeDoc.uri;
+    if (!hasValidTraceExtension(fileUri)) {
       return resolve(TraceOpenResult.FileInvalidExtention);
     }
 
@@ -57,7 +57,7 @@ export function openTraceForActiveEditor(_context: vscode.ExtensionContext): The
           perfettoSession.deactivate();
         });
 
-        const fileName = path.basename(filePath);
+        const fileName = Utils.basename(fileUri);
         const fileBuffer = new TextEncoder().encode(activeDoc.getText()).buffer;
 
         perfettoSession.activate(fileName, fileBuffer, () => {
@@ -81,7 +81,7 @@ export function openTraceForFile(_context: vscode.ExtensionContext): Thenable<Tr
       }
 
       const fileUri = selection[0];
-      if (!hasValidTraceExtension(fileUri.fsPath)) {
+      if (!hasValidTraceExtension(fileUri)) {
         return resolve(TraceOpenResult.FileInvalidExtention);
       }
 
@@ -96,7 +96,7 @@ export function openTraceForFile(_context: vscode.ExtensionContext): Thenable<Tr
             perfettoSession.deactivate();
           });
 
-          const fileName = path.basename(fileUri.fsPath);
+          const fileName = Utils.basename(fileUri);
           vscode.workspace.fs.readFile(fileUri).then(fileBuffer => {
             perfettoSession.activate(fileName, fileBuffer.buffer, () => {
               tokenListener.dispose();
