@@ -14,7 +14,7 @@ export class PerfettoSession {
 		this.webviewPanel = vscode.window.createWebviewPanel(
 			"perfetto-ui", `${fileName} - Perfetto`,
 			{ viewColumn: vscode.ViewColumn.Active, preserveFocus: false },
-			{ enableScripts: true, retainContextWhenHidden: true }
+			{ enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] }
 		);
 
 		this.webviewPanel.onDidDispose(() => {
@@ -22,7 +22,7 @@ export class PerfettoSession {
 			return onDeactivate();
 		}, this, this.disposables);
 
-		this.webviewPanel.webview.onDidReceiveMessage((message: {command: string}) => {
+		this.webviewPanel.webview.onDidReceiveMessage((message: { command: string }) => {
 			switch (message.command) {
 				case WebviewConsts.VsCodeUiReadyCommand:
 					this.webviewPanel!.webview.postMessage({
