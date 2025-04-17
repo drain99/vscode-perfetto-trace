@@ -16,7 +16,7 @@ src/**
 # tool config scripts
 tsconfig.json
 eslint.config.mjs
-esbuild.js
+webpack.config.js
 .vscode-test.mjs
 
 # npm
