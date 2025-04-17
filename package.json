@@ -2,7 +2,7 @@
   "name": "perfetto-trace",
   "displayName": "Perfetto Trace",
   "description": "Open perfetto-compatible trace files in perfetto ui within VS Code even for remote workspaces.",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "license": "MIT",
   "homepage": "https://github.com/drain99/vscode-perfetto-trace",
   "repository": {
