@@ -8,12 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Features
-- Verify extension support in web instances (e.g., https://vscode.dev/).
+- Bundle perfetto ui with the extension for local environments with no or restricted internet access.
+- Keep a history of files selected with "Open Trace For File" command for fast access to reopen them.
+- Enable fuzzy search (alike ctrl+p) with "Open Trace For File" command.
+- Add extension support in web instances (e.g., https://vscode.dev/).
 - Option to open perfetto ui in browser as an alternate to embedded within vscode.
 
 ### Project infrastructure
 - Write extension tests to verify most ways to launch and close traces.
 - Automate tests with ci.
+
+## [0.2.11] - 2025-04-18
+
+### Added
+- Improve project description.
+- Add project keywords for better reachability.
+- Internally move to webpack for a smoother support for web instances.
 
 ## [0.2.10] - 2025-04-16
 
