@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Write extension tests to verify most ways to launch and close traces.
 - Automate tests with ci.
 
+## [0.2.11] - 2025-04-18
+
+### Added
+- Improve project description.
+- Add project keywords for better reachability.
+- Internally move to webpack for a smoother support for web instances.
+
 ## [0.2.10] - 2025-04-16
 
 ### Added
