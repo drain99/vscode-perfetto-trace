@@ -20,7 +20,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			Commands.OpenTraceFile,
-			() => openTraceForFile(context)
+			(fileUri: vscode.Uri | undefined) => openTraceForFile(context, fileUri)
 				.then(event => traceOpenResultHandler.handle(event))
 		)
 	);
