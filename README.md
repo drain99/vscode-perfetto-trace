@@ -1,4 +1,4 @@
-# Perfetto UI Extension for Visual Studio Code (Unofficial)
+# Unofficial Perfetto UI Extension for Visual Studio Code
 
 A VS Code extension that adds the ability to open and view perfetto-compatible trace files within VS Code.
 
@@ -18,6 +18,13 @@ This primary motivation is to automate the following remote profiling workflow:
 
 See [CHANGELOG](CHANGELOG.md) for more details and upcoming feature releases.
 
+## Credits
+
+Project icon from [google/perfetto project](https://github.com/google/perfetto)\
+Copyright (c) 2017, The Android Open Source Project\
+Licensed under the Apache License, Version 2.0, January 2004\
+https://github.com/google/perfetto/blob/main/LICENSE
+
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License and includes third-party components - see the [LICENSE](LICENSE) file for details.

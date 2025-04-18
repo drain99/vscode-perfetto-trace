@@ -9,6 +9,10 @@
     "type": "git",
     "url": "https://github.com/drain99/vscode-perfetto-trace"
   },
+  "bugs": {
+    "url": "https://github.com/drain99/vscode-perfetto-trace/issues"
+  },
+  "icon": "icon.png",
   "publisher": "drain99",
   "engines": {
     "vscode": "^1.99.0"
