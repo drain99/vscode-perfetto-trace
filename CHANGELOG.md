@@ -15,8 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option to open perfetto ui in browser as an alternate to embedded within vscode.
 
 ### Project infrastructure
-- Write extension tests to verify most ways to launch and close traces.
 - Automate tests with ci.
+
+## [0.3.0] - 2025-04-18
+
+### Added
+- Add project icon taken from [google/perfetto project](https://github.com/google/perfetto).
+- Configure and add integration tests for features.
+- More internal cleanup to target web support.
 
 ## [0.2.11] - 2025-04-18
 
