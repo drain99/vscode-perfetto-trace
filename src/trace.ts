@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as vscode from 'vscode';
-import * as path from 'path';
+import { Utils } from 'vscode-uri';
 import { PerfettoSession } from './webview';
 import { TraceOpenResult } from './constants';
 
@@ -13,7 +13,7 @@ export class TraceOpenResultHandler {
     this.showOpenTraceFailMessage = true;
   }
 
-  public handle(result: TraceOpenResult): void {
+  public handle(result: TraceOpenResult): boolean {
     // Show error message on trace open failure but allow user to disable these messages
     if (result !== TraceOpenResult.Success && this.showOpenTraceFailMessage) {
       vscode.window.showErrorMessage(`Failed to open trace: ${result}`, 'Do Not Show Again')
@@ -23,15 +23,27 @@ export class TraceOpenResultHandler {
           }
         });
     }
+    return result === TraceOpenResult.Success;
   }
 }
 
-function hasValidTraceExtension(filePath: string): boolean {
-  // Skip extention check for now, perfetto accepts a variety of formats with non-standard extensions
-  return true;
-  const validExtensions = [".json", ".trace", ".chrome-trace", ".perfetto-trace"];
-  const ext = path.extname(filePath);
-  return validExtensions.includes(ext);
+type Expected<T> = { ok: true, val: T } | { ok: false, err: TraceOpenResult };
+function Ok<T>(val: T): Expected<T> { return { ok: true, val }; }
+function Err<T>(err: TraceOpenResult): Expected<T> { return { ok: false, err }; }
+
+async function showFileSelector(fileUri: vscode.Uri | undefined): Promise<Expected<vscode.Uri>> {
+  if (fileUri) {
+    return Ok(fileUri);
+  }
+
+  const selection = await vscode.window.showOpenDialog({ canSelectFiles: true, canSelectMany: false });
+  if (!selection) {
+    return Err(TraceOpenResult.NoFileSelected);
+  }
+  if (selection.length !== 1) {
+    return Err(TraceOpenResult.MultipleFileSelected);
+  }
+  return Ok(selection[0]);
 }
 
 export function openTraceForActiveEditor(_context: vscode.ExtensionContext): Thenable<TraceOpenResult> {
@@ -39,11 +51,6 @@ export function openTraceForActiveEditor(_context: vscode.ExtensionContext): The
     const activeDoc = vscode.window.activeTextEditor?.document;
     if (!activeDoc) {
       return resolve(TraceOpenResult.NoActiveEditor);
-    }
-
-    const filePath = activeDoc.fileName;
-    if (!hasValidTraceExtension(filePath)) {
-      return resolve(TraceOpenResult.FileInvalidExtention);
     }
 
     return resolve(vscode.window.withProgress({
@@ -57,7 +64,7 @@ export function openTraceForActiveEditor(_context: vscode.ExtensionContext): The
           perfettoSession.deactivate();
         });
 
-        const fileName = path.basename(filePath);
+        const fileName = Utils.basename(activeDoc.uri);
         const fileBuffer = new TextEncoder().encode(activeDoc.getText()).buffer;
 
         perfettoSession.activate(fileName, fileBuffer, () => {
@@ -69,21 +76,14 @@ export function openTraceForActiveEditor(_context: vscode.ExtensionContext): The
   });
 }
 
-export function openTraceForFile(_context: vscode.ExtensionContext): Thenable<TraceOpenResult> {
-  return vscode.window.showOpenDialog({ canSelectFiles: true, canSelectMany: false }).then(selection => {
+export function openTraceForFile(_context: vscode.ExtensionContext, fileUri: vscode.Uri | undefined): Thenable<TraceOpenResult> {
+  return showFileSelector(fileUri).then(selection => {
     return new Promise<TraceOpenResult>(resolve => {
-      if (!selection) {
-        return resolve(TraceOpenResult.NoFileSelected);
+      if (!selection.ok) {
+        return resolve(selection.err);
       }
 
-      if (selection.length !== 1) {
-        return resolve(TraceOpenResult.MultipleFileSelected);
-      }
-
-      const fileUri = selection[0];
-      if (!hasValidTraceExtension(fileUri.fsPath)) {
-        return resolve(TraceOpenResult.FileInvalidExtention);
-      }
+      const fileUri = selection.val;
 
       return resolve(vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
@@ -96,7 +96,7 @@ export function openTraceForFile(_context: vscode.ExtensionContext): Thenable<Tr
             perfettoSession.deactivate();
           });
 
-          const fileName = path.basename(fileUri.fsPath);
+          const fileName = Utils.basename(fileUri);
           vscode.workspace.fs.readFile(fileUri).then(fileBuffer => {
             perfettoSession.activate(fileName, fileBuffer.buffer, () => {
               tokenListener.dispose();

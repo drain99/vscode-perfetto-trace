@@ -17,7 +17,9 @@ src/**
 tsconfig.json
 eslint.config.mjs
 webpack.config.js
-.vscode-test.mjs
+
+# test resources
+test-workspace/**
 
 # npm
 node_modules/**
