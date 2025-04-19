@@ -10,7 +10,7 @@ export class PerfettoSession {
 
 	public constructor() { }
 
-	public activate(fileName: string, fileBuffer: ArrayBuffer, onDeactivate: () => void, onTraceLoaded: () => void) {
+	public activate(fileName: string, fileBuffer: ArrayBuffer, onTraceLoaded: () => void, onDeactivate: () => void) {
 		this.webviewPanel = vscode.window.createWebviewPanel(
 			"perfetto-ui", `${fileName} - Perfetto`,
 			{ viewColumn: vscode.ViewColumn.Active, preserveFocus: false },

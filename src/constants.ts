@@ -14,10 +14,12 @@ export enum Commands {
   OpenTraceFile = "perfetto-trace.open-trace-file",
 };
 
-export enum TraceOpenResult {
+export enum TraceOpenSuccess {
   Success = "Successfully Opened Trace!",
+};
+
+export enum TraceOpenFailure {
   NoActiveEditor = "No Active Editor Found!",
-  FileInvalidExtention = "File Has Invalid Extension!",
   NoFileSelected = "No File Is Selected To Be Opened!",
   MultipleFileSelected = "Multiple Files Are Selected To Be Opened!",
   UserCanceledAction = "User canceled action!",

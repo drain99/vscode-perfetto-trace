@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			Commands.OpenTraceActiveEditor,
-			() => openTraceForActiveEditor(context)
+			(): Thenable<boolean> => openTraceForActiveEditor(context)
 				.then(event => traceOpenResultHandler.handle(event))
 		)
 	);
@@ -20,7 +20,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			Commands.OpenTraceFile,
-			(fileUri: vscode.Uri | undefined) => openTraceForFile(context, fileUri)
+			(fileUri: vscode.Uri | undefined): Thenable<boolean> => openTraceForFile(context, fileUri)
 				.then(event => traceOpenResultHandler.handle(event))
 		)
 	);
