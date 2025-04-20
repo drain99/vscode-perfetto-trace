@@ -49,12 +49,15 @@ export async function openTraceForFile(context: Context, fileUri: vscode.Uri | u
       const tokenListener = token.onCancellationRequested(() => sess.deactivate());
 
       const fileName = Utils.basename(selection.val);
-      vscode.workspace.fs.readFile(selection.val).then(fileBuffer => fileBuffer.buffer).then(fileBuffer => {
-        sess.activate(fileName, fileBuffer, () => resolve(Ok(selection.val)), () => {
-          tokenListener.dispose();
-          resolve(Err(TraceOpenFailure.UserCanceledAction));
-        });
-      }, () => resolve(Err(TraceOpenFailure.FileReadFailure)));
+      Promise.resolve<Uint8Array>(vscode.workspace.fs.readFile(selection.val))
+        .then(fileBuffer => fileBuffer.buffer)
+        .then(fileBuffer => {
+          sess.activate(fileName, fileBuffer, () => resolve(Ok(selection.val)), () => {
+            tokenListener.dispose();
+            resolve(Err(TraceOpenFailure.UserCanceledAction));
+          });
+        })
+        .catch(() => resolve(Err(TraceOpenFailure.FileReadFailure)));
     });
   });
 }
