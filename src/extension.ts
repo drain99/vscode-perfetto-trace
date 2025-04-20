@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as vscode from 'vscode';
-import { openTraceForActiveEditor, openTraceForFile, TraceOpenResultHandler } from './trace';
+import { openTraceForActiveDoc, openTraceForFile, TraceOpenResultHandler } from './trace';
 import { Commands } from './constants';
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -11,8 +11,8 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Register all commands
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-			Commands.OpenTraceActiveEditor,
-			(): Thenable<boolean> => openTraceForActiveEditor(context)
+			Commands.OpenTraceActiveDoc,
+			(): Thenable<boolean> => openTraceForActiveDoc(context)
 				.then(event => traceOpenResultHandler.handle(event))
 		)
 	);

@@ -31,8 +31,8 @@
     "commands": [
       {
         "category": "Perfetto",
-        "command": "perfetto-trace.open-trace-active-editor",
-        "title": "Open Trace For Active Editor"
+        "command": "perfetto-trace.open-trace-active-doc",
+        "title": "Open Trace For Active Document"
       },
       {
         "category": "Perfetto",

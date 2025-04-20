@@ -28,7 +28,7 @@ suite("Extension Test Suite", () => {
 
 		assert.equal(editSuccess, true);
 
-		const execSuccess = await vscode.commands.executeCommand(Commands.OpenTraceActiveEditor);
+		const execSuccess = await vscode.commands.executeCommand(Commands.OpenTraceActiveDoc);
 		assert.equal(execSuccess, true);
 	});
 

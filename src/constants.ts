@@ -10,7 +10,7 @@ export enum WebviewConsts {
 };
 
 export enum Commands {
-  OpenTraceActiveEditor = "perfetto-trace.open-trace-active-editor",
+  OpenTraceActiveDoc = "perfetto-trace.open-trace-active-doc",
   OpenTraceFile = "perfetto-trace.open-trace-file",
 };
 

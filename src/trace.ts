@@ -43,7 +43,7 @@ async function showFileSelector(fileUri: vscode.Uri | undefined): Promise<Expect
   return Ok(files[0]);
 }
 
-export async function openTraceForActiveEditor(_context: vscode.ExtensionContext): Promise<Expected<TraceOpenSuccess>> {
+export async function openTraceForActiveDoc(_context: vscode.ExtensionContext): Promise<Expected<TraceOpenSuccess>> {
   const activeDoc = vscode.window.activeTextEditor?.document;
   if (!activeDoc) {
     return Err(TraceOpenFailure.NoActiveEditor);
@@ -86,10 +86,10 @@ export async function openTraceForFile(_context: vscode.ExtensionContext, fileUr
 
       const fileName = Utils.basename(selection.val);
       vscode.workspace.fs.readFile(selection.val).then(fileBuffer => fileBuffer.buffer).then(fileBuffer => {
-        sess.activate(fileName, fileBuffer, () => resolve(Ok(TraceOpenSuccess.Success)), () => {
-          tokenListener.dispose();
-          resolve(Err(TraceOpenFailure.UserCanceledAction));
-        });
+      sess.activate(fileName, fileBuffer, () => resolve(Ok(TraceOpenSuccess.Success)), () => {
+        tokenListener.dispose();
+        resolve(Err(TraceOpenFailure.UserCanceledAction));
+});
       });
     });
   });
