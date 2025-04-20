@@ -9,13 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 - Bundle perfetto ui with the extension for local environments with no or restricted internet access.
-- Keep a history of files selected with "Open Trace For File" command for fast access to reopen them.
-- Enable fuzzy search (alike ctrl+p) with "Open Trace For File" command.
 - Add extension support in web instances (e.g., https://vscode.dev/).
 - Option to open perfetto ui in browser as an alternate to embedded within vscode.
 
 ### Project infrastructure
 - Automate tests with ci.
+
+## [0.4.0] - 2025-04-20
+
+### Added
+- `Open Trace For File` command now keeps a history of successfully opened files and shows them for fast reopen.
+- `Open Trace For File` command now also efficiently handles multi-root workspaces.
+- Handle more errors internally for a more stable implementation.
+
+## Changed
+- Changed command `Open Trace For Active Editor` to `Open Trace For Active Document` to be less technical.
+
 
 ## [0.3.0] - 2025-04-18
 

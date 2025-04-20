@@ -4,107 +4,57 @@
 import * as vscode from 'vscode';
 import { Utils } from 'vscode-uri';
 import { PerfettoSession } from './webview';
-import { TraceOpenResult } from './constants';
+import { Unit, TraceOpenFailure, Expected, Err, Ok } from './constants';
+import { Context } from './context';
 
-export class TraceOpenResultHandler {
-  private showOpenTraceFailMessage: boolean;
-
-  public constructor() {
-    this.showOpenTraceFailMessage = true;
+export async function openTraceForActiveDoc(_context: Context): Promise<Expected<Unit>> {
+  const activeDoc = vscode.window.activeTextEditor?.document;
+  if (!activeDoc) {
+    return Err(TraceOpenFailure.NoActiveDocument);
   }
 
-  public handle(result: TraceOpenResult): boolean {
-    // Show error message on trace open failure but allow user to disable these messages
-    if (result !== TraceOpenResult.Success && this.showOpenTraceFailMessage) {
-      vscode.window.showErrorMessage(`Failed to open trace: ${result}`, 'Do Not Show Again')
-        .then(selection => {
-          if (selection === 'Do Not Show Again') {
-            this.showOpenTraceFailMessage = false;
-          }
-        });
-    }
-    return result === TraceOpenResult.Success;
-  }
-}
+  return vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification,
+    cancellable: true,
+    title: "Opening Trace"
+  }, (_progress, token) => {
+    return new Promise<Expected<Unit>>(resolve => {
+      const sess = new PerfettoSession();
+      const tokenListener = token.onCancellationRequested(() => sess.deactivate());
 
-type Expected<T> = { ok: true, val: T } | { ok: false, err: TraceOpenResult };
-function Ok<T>(val: T): Expected<T> { return { ok: true, val }; }
-function Err<T>(err: TraceOpenResult): Expected<T> { return { ok: false, err }; }
+      const fileName = Utils.basename(activeDoc.uri);
+      const fileBuffer = new TextEncoder().encode(activeDoc.getText()).buffer;
 
-async function showFileSelector(fileUri: vscode.Uri | undefined): Promise<Expected<vscode.Uri>> {
-  if (fileUri) {
-    return Ok(fileUri);
-  }
-
-  const selection = await vscode.window.showOpenDialog({ canSelectFiles: true, canSelectMany: false });
-  if (!selection) {
-    return Err(TraceOpenResult.NoFileSelected);
-  }
-  if (selection.length !== 1) {
-    return Err(TraceOpenResult.MultipleFileSelected);
-  }
-  return Ok(selection[0]);
-}
-
-export function openTraceForActiveEditor(_context: vscode.ExtensionContext): Thenable<TraceOpenResult> {
-  return new Promise<TraceOpenResult>(resolve => {
-    const activeDoc = vscode.window.activeTextEditor?.document;
-    if (!activeDoc) {
-      return resolve(TraceOpenResult.NoActiveEditor);
-    }
-
-    return resolve(vscode.window.withProgress({
-      location: vscode.ProgressLocation.Notification,
-      cancellable: true,
-      title: "Opening Trace"
-    }, (_progress, token) => {
-      return new Promise<TraceOpenResult>(resolve => {
-        const perfettoSession = new PerfettoSession();
-        const tokenListener = token.onCancellationRequested(() => {
-          perfettoSession.deactivate();
-        });
-
-        const fileName = Utils.basename(activeDoc.uri);
-        const fileBuffer = new TextEncoder().encode(activeDoc.getText()).buffer;
-
-        perfettoSession.activate(fileName, fileBuffer, () => {
-          tokenListener.dispose();
-          return resolve(TraceOpenResult.UserCanceledAction);
-        }, () => resolve(TraceOpenResult.Success));
+      sess.activate(fileName, fileBuffer, () => resolve(Ok(Unit.unit)), () => {
+        tokenListener.dispose();
+        resolve(Err(TraceOpenFailure.UserCanceledAction));
       });
-    }));
+    });
   });
 }
 
-export function openTraceForFile(_context: vscode.ExtensionContext, fileUri: vscode.Uri | undefined): Thenable<TraceOpenResult> {
-  return showFileSelector(fileUri).then(selection => {
-    return new Promise<TraceOpenResult>(resolve => {
-      if (!selection.ok) {
-        return resolve(selection.err);
-      }
+export async function openTraceForFile(context: Context, fileUri: vscode.Uri | undefined): Promise<Expected<vscode.Uri>> {
+  const selection = fileUri ? Ok(fileUri) : (await context.fileSelector.selectFile());
+  if (!selection.ok) {
+    return Err(selection.err);
+  }
 
-      const fileUri = selection.val;
+  return vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification,
+    cancellable: true,
+    title: "Opening Trace"
+  }, (_progress, token) => {
+    return new Promise<Expected<vscode.Uri>>(resolve => {
+      const sess = new PerfettoSession();
+      const tokenListener = token.onCancellationRequested(() => sess.deactivate());
 
-      return resolve(vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        cancellable: true,
-        title: "Opening Trace"
-      }, (_progress, token) => {
-        return new Promise<TraceOpenResult>(resolve => {
-          const perfettoSession = new PerfettoSession();
-          const tokenListener = token.onCancellationRequested(() => {
-            perfettoSession.deactivate();
-          });
-
-          const fileName = Utils.basename(fileUri);
-          vscode.workspace.fs.readFile(fileUri).then(fileBuffer => {
-            perfettoSession.activate(fileName, fileBuffer.buffer, () => {
-              tokenListener.dispose();
-              return resolve(TraceOpenResult.UserCanceledAction);
-            }, () => resolve(TraceOpenResult.Success));
-          });
+      const fileName = Utils.basename(selection.val);
+      vscode.workspace.fs.readFile(selection.val).then(fileBuffer => fileBuffer.buffer).then(fileBuffer => {
+        sess.activate(fileName, fileBuffer, () => resolve(Ok(selection.val)), () => {
+          tokenListener.dispose();
+          resolve(Err(TraceOpenFailure.UserCanceledAction));
         });
-      }));
+      }, () => resolve(Err(TraceOpenFailure.FileReadFailure)));
     });
   });
 }

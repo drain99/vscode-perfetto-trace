@@ -10,15 +10,29 @@ export enum WebviewConsts {
 };
 
 export enum Commands {
-  OpenTraceActiveEditor = "perfetto-trace.open-trace-active-editor",
+  OpenTraceActiveDoc = "perfetto-trace.open-trace-active-doc",
   OpenTraceFile = "perfetto-trace.open-trace-file",
 };
 
-export enum TraceOpenResult {
-  Success = "Successfully Opened Trace!",
-  NoActiveEditor = "No Active Editor Found!",
-  FileInvalidExtention = "File Has Invalid Extension!",
+export enum TraceOpenFailure {
+  NoActiveDocument = "Active Document Not Found!",
   NoFileSelected = "No File Is Selected To Be Opened!",
   MultipleFileSelected = "Multiple Files Are Selected To Be Opened!",
-  UserCanceledAction = "User canceled action!",
+  UserCanceledAction = "User Canceled Action!",
+  FileReadFailure = "Failed To Read Selected File!",
 };
+
+export enum QuickPickItemType {
+  Separator,
+  File,
+  Workspace,
+  CurrentDirectory,
+};
+
+export enum Unit {
+  unit
+};
+
+export type Expected<T, E = TraceOpenFailure> = { ok: true, val: T } | { ok: false, err: E };
+export function Ok<T, E = TraceOpenFailure>(val: T): Expected<T, E> { return { ok: true, val }; }
+export function Err<T, E = TraceOpenFailure>(err: E): Expected<T, E> { return { ok: false, err }; }
