@@ -2,26 +2,42 @@
 // Licensed under the MIT License.
 
 import * as vscode from 'vscode';
-import { openTraceForActiveDoc, openTraceForFile, TraceOpenResultHandler } from './trace';
+import { openTraceForActiveDoc, openTraceForFile } from './trace';
 import { Commands } from './constants';
+import { Context } from './context';
 
-export function activate(context: vscode.ExtensionContext): void {
-	const traceOpenResultHandler = new TraceOpenResultHandler();
+export function activate(extContext: vscode.ExtensionContext): void {
+	const context = new Context(extContext);
 
 	// Register all commands
-	context.subscriptions.push(
+	extContext.subscriptions.push(
 		vscode.commands.registerCommand(
 			Commands.OpenTraceActiveDoc,
-			(): Thenable<boolean> => openTraceForActiveDoc(context)
-				.then(event => traceOpenResultHandler.handle(event))
+			async (): Promise<boolean> => {
+				try {
+					const openStatus = await openTraceForActiveDoc(context);
+					return context.errorHandler.handleTracked(openStatus);
+				} catch (err) {
+					return context.errorHandler.handleUnknown(err);
+				}
+			}
 		)
 	);
 
-	context.subscriptions.push(
+	extContext.subscriptions.push(
 		vscode.commands.registerCommand(
 			Commands.OpenTraceFile,
-			(fileUri: vscode.Uri | undefined): Thenable<boolean> => openTraceForFile(context, fileUri)
-				.then(event => traceOpenResultHandler.handle(event))
+			async (fileUri: vscode.Uri | undefined): Promise<boolean> => {
+				try {
+					const openStatus = await openTraceForFile(context, fileUri);
+					if (openStatus.ok) {
+						context.fileSelector.markAsMostRecentlyOpened(openStatus.val);
+					}
+					return context.errorHandler.handleTracked(openStatus);
+				} catch (err) {
+					return context.errorHandler.handleUnknown(err);
+				}
+			}
 		)
 	);
 }
