@@ -46,7 +46,7 @@ export class PerfettoSession {
 				case WebviewConsts.VsCodeTraceLoadedCommand:
 					return onTraceLoaded();
 				default:
-					return console.error("PerfettoSession webivew got unexpected message:", message);
+					return console.error("PerfettoSession webview received unexpected message:", message);
 			}
 		}, this, this.disposables);
 

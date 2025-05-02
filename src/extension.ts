@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import * as vscode from 'vscode';
-import { openTraceForActiveDoc, openTraceForFile } from './trace';
+import { openTraceForActiveEditor, openTraceForFile } from './trace';
 import { Commands } from './constants';
 import { Context } from './context';
 
@@ -12,10 +12,10 @@ export function activate(extContext: vscode.ExtensionContext): void {
 	// Register all commands
 	extContext.subscriptions.push(
 		vscode.commands.registerCommand(
-			Commands.OpenTraceActiveDoc,
+			Commands.OpenTraceActiveEditor,
 			async (): Promise<boolean> => {
 				try {
-					const openStatus = await openTraceForActiveDoc(context);
+					const openStatus = await openTraceForActiveEditor(context);
 					return context.errorHandler.handleTracked(openStatus);
 				} catch (err) {
 					return context.errorHandler.handleUnknown(err);

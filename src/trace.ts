@@ -7,7 +7,7 @@ import { PerfettoSession } from './webview';
 import { Unit, TraceOpenFailure, Expected, Err, Ok } from './constants';
 import { Context } from './context';
 
-export async function openTraceForActiveDoc(_context: Context): Promise<Expected<Unit>> {
+export async function openTraceForActiveEditor(_context: Context): Promise<Expected<Unit>> {
   const activeDoc = vscode.window.activeTextEditor?.document;
   if (!activeDoc) {
     return Err(TraceOpenFailure.NoActiveDocument);
@@ -19,13 +19,13 @@ export async function openTraceForActiveDoc(_context: Context): Promise<Expected
     title: "Opening Trace"
   }, (_progress, token) => {
     return new Promise<Expected<Unit>>(resolve => {
-      const sess = new PerfettoSession();
-      const tokenListener = token.onCancellationRequested(() => sess.deactivate());
+      const session = new PerfettoSession();
+      const tokenListener = token.onCancellationRequested(() => session.deactivate());
 
       const fileName = Utils.basename(activeDoc.uri);
       const fileBuffer = new TextEncoder().encode(activeDoc.getText()).buffer;
 
-      sess.activate(fileName, fileBuffer, () => resolve(Ok(Unit.unit)), () => {
+      session.activate(fileName, fileBuffer, () => resolve(Ok(Unit.unit)), () => {
         tokenListener.dispose();
         resolve(Err(TraceOpenFailure.UserCanceledAction));
       });
@@ -45,14 +45,14 @@ export async function openTraceForFile(context: Context, fileUri: vscode.Uri | u
     title: "Opening Trace"
   }, (_progress, token) => {
     return new Promise<Expected<vscode.Uri>>(resolve => {
-      const sess = new PerfettoSession();
-      const tokenListener = token.onCancellationRequested(() => sess.deactivate());
+      const session = new PerfettoSession();
+      const tokenListener = token.onCancellationRequested(() => session.deactivate());
 
       const fileName = Utils.basename(selection.val);
       Promise.resolve<Uint8Array>(vscode.workspace.fs.readFile(selection.val))
         .then(fileBuffer => fileBuffer.buffer)
         .then(fileBuffer => {
-          sess.activate(fileName, fileBuffer, () => resolve(Ok(selection.val)), () => {
+          session.activate(fileName, fileBuffer, () => resolve(Ok(selection.val)), () => {
             tokenListener.dispose();
             resolve(Err(TraceOpenFailure.UserCanceledAction));
           });
