@@ -15,6 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Project infrastructure
 - Automate tests with ci.
 
+## [1.0.0] - 2025-05-02
+
+## Changed
+- Revert to `editor` terminology instead of `document` for `Open Trace For Active Editor`
+- Mark extension as preview in marketplace for initial v1.0 release.
+
+## [0.4.1] - 2025-04-20
+
+### Fixed
+- More error handling if file cannot be opened or read during trace launch.
+
 ## [0.4.0] - 2025-04-20
 
 ### Added

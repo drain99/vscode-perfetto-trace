@@ -10,6 +10,8 @@ Provides following commands to open a trace file in [Perfetto UI](https://ui.per
 - `Open Trace For File`
   - Opens pop up to select file to open & loads it in a new perfetto ui tab.
 
+Additionally keeps a history of recently opened files and workspaces for quick access.
+
 This primary motivation is to automate the following remote profiling workflow:
 - generate trace file on remote
 - copy trace file to local (scp or manual copy to notepad & save)

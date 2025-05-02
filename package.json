@@ -14,6 +14,7 @@
   },
   "icon": "icon.png",
   "publisher": "drain99",
+  "preview": true,
   "engines": {
     "vscode": "^1.99.0"
   },
@@ -31,8 +32,8 @@
     "commands": [
       {
         "category": "Perfetto",
-        "command": "perfetto-trace.open-trace-active-doc",
-        "title": "Open Trace For Active Document"
+        "command": "perfetto-trace.open-trace-active-editor",
+        "title": "Open Trace For Active Editor"
       },
       {
         "category": "Perfetto",
