@@ -1,3 +1,8 @@
+[![VS Code Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/drain99.perfetto-trace?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=drain99.perfetto-trace)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/drain99.perfetto-trace?label=Installs)](https://marketplace.visualstudio.com/items?itemName=drain99.perfetto-trace)
+[![Rating](https://img.shields.io/visual-studio-marketplace/r/drain99.perfetto-trace?label=Rating)](https://marketplace.visualstudio.com/items?itemName=drain99.perfetto-trace)
+
+
 # Unofficial Perfetto UI Extension for Visual Studio Code
 
 A VS Code extension that adds the ability to open and view perfetto-compatible trace files within VS Code.
