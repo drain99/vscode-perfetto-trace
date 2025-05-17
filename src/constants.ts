@@ -14,12 +14,9 @@ export enum Commands {
   OpenTraceFile = "perfetto-trace.open-trace-file",
 };
 
-export enum TraceOpenFailure {
-  NoActiveDocument = "Active Document Not Found!",
-  NoFileSelected = "No File Is Selected To Be Opened!",
-  MultipleFileSelected = "Multiple Files Are Selected To Be Opened!",
-  UserCanceledAction = "User Canceled Action!",
-  FileReadFailure = "Failed To Read Selected File!",
+export enum EditorViewTypes {
+  PerfettoNativeEditor = "perfetto-trace.perfetto-native-editor",
+  PerfettoWebviewEditor = "perfetto-trace.perfetto-webview-editor",
 };
 
 export enum QuickPickItemType {
@@ -28,11 +25,3 @@ export enum QuickPickItemType {
   Workspace,
   CurrentDirectory,
 };
-
-export enum Unit {
-  unit
-};
-
-export type Expected<T, E = TraceOpenFailure> = { ok: true, val: T } | { ok: false, err: E };
-export function Ok<T, E = TraceOpenFailure>(val: T): Expected<T, E> { return { ok: true, val }; }
-export function Err<T, E = TraceOpenFailure>(err: E): Expected<T, E> { return { ok: false, err }; }

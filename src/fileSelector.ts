@@ -3,7 +3,8 @@
 
 import * as vscode from 'vscode';
 import { Utils } from 'vscode-uri';
-import { Err, Expected, Ok, QuickPickItemType, TraceOpenFailure } from './constants';
+import { QuickPickItemType } from './constants';
+import { MultipleFilesSelectedError, NoFileSelectedError } from './utils';
 
 type QuickPickItem = vscode.QuickPickItem & (
   { itemType: QuickPickItemType.Separator } |
@@ -13,11 +14,9 @@ type QuickPickItem = vscode.QuickPickItem & (
 );
 
 export class PersistentFileSelector {
-  private fileHistory: vscode.Uri[];
+  private fileHistory: vscode.Uri[] = [];
 
-  public constructor() {
-    this.fileHistory = [];
-  }
+  public constructor() { }
 
   private async removeInvalidFiles() {
     const isValidFile = await Promise.all(this.fileHistory.map(fileUri =>
@@ -42,11 +41,12 @@ export class PersistentFileSelector {
       this.fileHistory.forEach(fileUri => {
         const fileName = Utils.basename(fileUri);
         const wsName = vscode.workspace.getWorkspaceFolder(fileUri)?.name;
+        const wsRelativePath = vscode.workspace.asRelativePath(fileUri, false);
 
         items.push({
           label: fileName,
           description: wsName,
-          detail: fileUri.path,
+          detail: wsRelativePath,
           itemType: QuickPickItemType.File,
           fileUri
         });
@@ -83,54 +83,62 @@ export class PersistentFileSelector {
     return items;
   }
 
-  public async selectFile(): Promise<Expected<vscode.Uri>> {
+  public async selectFile(): Promise<vscode.Uri> {
+    // Remove files that might have been deleted since.
     await this.removeInvalidFiles();
+
     const quickPickItems = this.createQuickPickList();
     const item = await vscode.window.showQuickPick(quickPickItems, {
       title: 'Locate File To Open',
       matchOnDescription: true, matchOnDetail: true, canPickMany: false
     });
     if (!item) {
-      return Err(TraceOpenFailure.NoFileSelected);
+      throw new NoFileSelectedError();
     }
 
     switch (item.itemType) {
       case QuickPickItemType.File: {
-        return Ok(item.fileUri);
+        return item.fileUri;
       }
       case QuickPickItemType.Workspace: {
         const selection = await vscode.window.showOpenDialog({ defaultUri: item.wsUri, canSelectFiles: true, canSelectMany: false });
         if (!selection) {
-          return Err(TraceOpenFailure.NoFileSelected);
+          throw new NoFileSelectedError();
         }
         if (selection.length !== 1) {
-          return Err(TraceOpenFailure.MultipleFileSelected);
+          throw new MultipleFilesSelectedError();
         }
-        return Ok(selection[0]);
+        return selection[0];
       }
       case QuickPickItemType.CurrentDirectory: {
         const selection = await vscode.window.showOpenDialog({ canSelectFiles: true, canSelectMany: false });
         if (!selection) {
-          return Err(TraceOpenFailure.NoFileSelected);
+          throw new NoFileSelectedError();
         }
         if (selection.length !== 1) {
-          return Err(TraceOpenFailure.MultipleFileSelected);
+          throw new MultipleFilesSelectedError();
         }
-        return Ok(selection[0]);
+        return selection[0];
       }
       default: {
-        return Err(TraceOpenFailure.NoFileSelected);
+        throw new NoFileSelectedError();
       }
     }
   }
 
   public markAsMostRecentlyOpened(fileUri: vscode.Uri) {
-    const i = this.fileHistory.indexOf(fileUri);
+    // Uri equality is weaker than semantic equality, hence normalize as string.
+    const i = this.fileHistory.findIndex(uri => uri.toString() === fileUri.toString());
     if (i > 0) {
       this.fileHistory.splice(i, 1);
       this.fileHistory.unshift(fileUri);
     } else if (i === -1) {
       this.fileHistory.unshift(fileUri);
+    }
+
+    // Restrict capacity to 10.
+    if (this.fileHistory.length > 10) {
+      this.fileHistory.pop();
     }
   }
 };

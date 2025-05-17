@@ -40,7 +40,15 @@
         "command": "perfetto-trace.open-trace-file",
         "title": "Open Trace For File"
       }
-    ]
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "perfetto-trace.open-trace-file",
+          "group": "navigation@999"
+        }
+      ]
+    }
   },
   "scripts": {
     "lint": "eslint src",

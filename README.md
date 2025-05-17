@@ -17,9 +17,9 @@ Provides following commands to open a trace file in [Perfetto UI](https://ui.per
 
 Additionally keeps a history of recently opened files and workspaces for quick access.
 
-This primary motivation is to automate the following remote profiling workflow:
+The primary motivation is to automate the following remote profiling workflow:
 - generate trace file on remote
-- copy trace file to local (scp or manual copy to notepad & save)
+- copy trace file to local (scp or manual copy to local editor & save)
 - open [Perfetto UI](https://ui.perfetto.dev/) in browser
 - open local trace file
 
