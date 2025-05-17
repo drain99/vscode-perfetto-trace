@@ -5,15 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Features
-- Bundle perfetto ui with the extension for local environments with no or restricted internet access.
-- Add extension support in web instances (e.g., https://vscode.dev/).
-- Option to open perfetto ui in browser as an alternate to embedded within vscode.
-
 ### Project infrastructure
 - Automate tests with ci.
+
+## [1.1.0] - 2025-05-17
+
+## Added
+- Add explorer (ctrl+shift+E) context menu (right-click) item `Open Trace For File`.
+This is equivalent to the command `Open Trace For File` and skips the file selection steps.
 
 ## [1.0.0] - 2025-05-02
 

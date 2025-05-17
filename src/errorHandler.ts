@@ -2,34 +2,28 @@
 // Licensed under the MIT License.
 
 import * as vscode from 'vscode';
-import { Unit, Expected, TraceOpenFailure } from './constants';
+import { NoActiveEditorError, UntitledUriPerfettoEditorNotSupportedError } from './utils';
 
-export class TraceOpenErrorHandler {
-  private showOpenTraceFailMessage: boolean;
-  private userShownErrors: TraceOpenFailure[];
+export class PerfettoErrorHandler {
+  private showOpenTraceFailMessage: boolean = true;
+  private readonly userShownErrors: (new () => Error)[] = [NoActiveEditorError, UntitledUriPerfettoEditorNotSupportedError];
 
-  public constructor() {
-    this.showOpenTraceFailMessage = true;
-    this.userShownErrors = [TraceOpenFailure.NoActiveDocument, TraceOpenFailure.FileReadFailure];
-  }
+  public constructor() { }
 
-  public handleTracked(result: Expected<any>): boolean {
-    if (!result.ok) {
-      console.log("Tracked error detected:", result.err);
-      if (this.showOpenTraceFailMessage && this.userShownErrors.includes(result.err)) {
-        vscode.window.showErrorMessage(`Failed To Open Trace: ${result.err}`, 'Do Not Show Again')
-          .then(selection => {
-            if (selection === 'Do Not Show Again') {
-              this.showOpenTraceFailMessage = false;
-            }
-          });
-      }
+  public handle(error: any): void {
+    if (error instanceof Error) {
+      console.log("Handled error:", error.message);
+    } else {
+      console.log("Handled non-Error error:", error);
     }
-    return result.ok;
-  }
 
-  public handleUnknown(err: any): boolean {
-    console.log("Unknown error detected:", err);
-    return false;
+    if (this.showOpenTraceFailMessage && this.userShownErrors.some(cls => error instanceof cls)) {
+      vscode.window.showErrorMessage(`Failed To Open Trace: ${error.message}`, 'Do Not Show Again')
+        .then(selection => {
+          if (selection === 'Do Not Show Again') {
+            this.showOpenTraceFailMessage = false;
+          }
+        });
+    }
   }
 }
