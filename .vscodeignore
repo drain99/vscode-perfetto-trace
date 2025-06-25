@@ -10,6 +10,9 @@ out/**
 **/*.ts
 **/*.vsix
 
+# non-functional assets
+demo.gif
+
 # sources
 src/**
 
