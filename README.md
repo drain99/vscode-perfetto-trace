@@ -7,6 +7,8 @@
 
 A VS Code extension that adds the ability to open and view perfetto-compatible trace files within VS Code.
 
+<img src="demo.gif" alt="demo GIF" width="820">
+
 ## Features
 
 Contributes following features to open a trace file in [perfetto ui](https://ui.perfetto.dev/) within VS Code.
