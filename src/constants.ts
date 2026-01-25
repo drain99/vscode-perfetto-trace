@@ -3,8 +3,11 @@
 
 import * as vscode from 'vscode';
 
+// This should be in sync with package.json configuration default for "perfetto-trace.path"
+const DefaultPerfettoOrigin: string = "https://ui.perfetto.dev";
+
 export const WebviewConsts = {
-  PerfettoOrigin: vscode.workspace.getConfiguration("perfetto-trace").get<string>("path") ?? "",
+  PerfettoOrigin: vscode.workspace.getConfiguration("perfetto-trace").get<string>("path", DefaultPerfettoOrigin),
   PerfettoFrameId: "perfetto-ui-iframe",
   VsCodeUiReadyCommand: "vscode-ui-ready",
   VsCodeLoadTraceCommand: "vscode-load-trace",

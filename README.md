@@ -18,6 +18,8 @@ Contributes following features to open a trace file in [perfetto ui](https://ui.
   - Opens pop up to select file to open & loads it in a new perfetto ui tab.
 - Explorer context menu item: `Open Trace For File`
   - Equivalent to `Open Trace For File` command but skips file selection steps.
+- Configuration `perfetto-trace.path`
+  - Customize perfetto ui URL. Defaults to https://ui.perfetto.dev/.
 
 Additionally keeps a history of recently opened files and workspaces for quick access.
 

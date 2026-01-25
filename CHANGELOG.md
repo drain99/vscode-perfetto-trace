@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Project infrastructure
 - Automate tests with ci.
 
+## [1.2.0] - 2026-01-25
+
+## Added
+- Perfetto ui URL can now be customized through configuration `perfetto-trace.path`.
+
 ## [1.1.0] - 2025-05-17
 
 ## Added
