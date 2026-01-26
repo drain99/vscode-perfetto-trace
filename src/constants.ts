@@ -1,12 +1,17 @@
 // Copyright (c) Indrajit Banerjee
 // Licensed under the MIT License.
 
-export enum WebviewConsts {
-  PerfettoOrigin = "https://ui.perfetto.dev",
-  PerfettoFrameId = "perfetto-ui-iframe",
-  VsCodeUiReadyCommand = "vscode-ui-ready",
-  VsCodeLoadTraceCommand = "vscode-load-trace",
-  VsCodeTraceLoadedCommand = "vscode-load-trace-complete",
+import * as vscode from 'vscode';
+
+// This should be in sync with package.json configuration default for "perfetto-trace.path"
+const DefaultPerfettoOrigin: string = "https://ui.perfetto.dev";
+
+export const WebviewConsts = {
+  PerfettoOrigin: vscode.workspace.getConfiguration("perfetto-trace").get<string>("path", DefaultPerfettoOrigin),
+  PerfettoFrameId: "perfetto-ui-iframe",
+  VsCodeUiReadyCommand: "vscode-ui-ready",
+  VsCodeLoadTraceCommand: "vscode-load-trace",
+  VsCodeTraceLoadedCommand: "vscode-load-trace-complete",
 };
 
 export enum Commands {

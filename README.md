@@ -1,6 +1,4 @@
-[![VS Code Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/drain99.perfetto-trace?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=drain99.perfetto-trace)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/drain99.perfetto-trace?label=Installs)](https://marketplace.visualstudio.com/items?itemName=drain99.perfetto-trace)
-[![Rating](https://img.shields.io/visual-studio-marketplace/r/drain99.perfetto-trace?label=Rating)](https://marketplace.visualstudio.com/items?itemName=drain99.perfetto-trace)
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/i/drain99.perfetto-trace?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=drain99.perfetto-trace)
 
 
 # Unofficial Perfetto UI Extension for Visual Studio Code
@@ -18,6 +16,8 @@ Contributes following features to open a trace file in [perfetto ui](https://ui.
   - Opens pop up to select file to open & loads it in a new perfetto ui tab.
 - Explorer context menu item: `Open Trace For File`
   - Equivalent to `Open Trace For File` command but skips file selection steps.
+- Configuration `perfetto-trace.path`
+  - Customize perfetto ui url. Defaults to https://ui.perfetto.dev/.
 
 Additionally keeps a history of recently opened files and workspaces for quick access.
 
