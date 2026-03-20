@@ -9,6 +9,18 @@ import { PerfettoDocument } from './perfettoDocument';
 export function activate(context: vscode.ExtensionContext): void {
 	const provider = new PerfettoEditorProvider(context);
 
+	// Register custom editor for .pftrace files
+	context.subscriptions.push(
+		vscode.window.registerCustomEditorProvider(
+			EditorViewTypes.PerfettoNativeEditor,
+			provider,
+			{
+				supportsMultipleEditorsPerDocument: false,
+				webviewOptions: { retainContextWhenHidden: true }
+			}
+		)
+	);
+
 	// Register all commands
 	context.subscriptions.push(
 		vscode.commands.registerCommand(

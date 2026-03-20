@@ -16,7 +16,7 @@
   "publisher": "drain99",
   "preview": true,
   "engines": {
-    "vscode": "^1.99.0"
+    "vscode": "^1.74.0"
   },
   "categories": [
     "Visualization",
@@ -49,6 +49,18 @@
         }
       ]
     },
+    "customEditors": [
+      {
+        "viewType": "perfetto-trace.perfetto-native-editor",
+        "displayName": "Perfetto Trace Viewer",
+        "selector": [
+          {
+            "filenamePattern": "*.pftrace"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "Perfetto Trace",
@@ -76,7 +88,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "@types/vscode": "^1.99.0",
+    "@types/vscode": "^1.74.0",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
     "@vscode/test-electron": "^2.5.2",

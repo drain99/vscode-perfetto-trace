@@ -16,6 +16,8 @@ Contributes following features to open a trace file in [perfetto ui](https://ui.
   - Opens pop up to select file to open & loads it in a new perfetto ui tab.
 - Explorer context menu item: `Open Trace For File`
   - Equivalent to `Open Trace For File` command but skips file selection steps.
+- Automatically open certain extensions in the perfetto ui
+  - Supported extensions: `.pftrace`
 - Configuration `perfetto-trace.path`
   - Customize perfetto ui url. Defaults to https://ui.perfetto.dev/.
 
@@ -26,6 +28,38 @@ The primary motivation is to automate the following remote profiling workflow:
 - copy trace file to local (scp or manual copy to local editor & save)
 - open [perfetto ui](https://ui.perfetto.dev/) in browser
 - open local trace file
+
+## Building from Source
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18+)
+- npm
+
+### Build & Package
+
+```bash
+npm install
+npx vsce package
+```
+
+This produces a `perfetto-trace-<version>.vsix` file.
+
+### Install
+
+**VS Code:**
+```bash
+code --install-extension perfetto-trace-*.vsix --force
+```
+
+**Cursor:**
+```bash
+cursor --install-extension perfetto-trace-*.vsix --force
+```
+
+Or use the Extensions sidebar: `...` menu > `Install from VSIX...`
+
+After installing, reload the window (`Ctrl+Shift+P` > `Developer: Reload Window`) — no full restart needed.
 
 ## Feature Proposals
 
